@@ -1,0 +1,5 @@
+config.toml
+data/
+reports/
+__pycache__/
+*.log

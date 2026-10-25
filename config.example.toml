@@ -1,0 +1,134 @@
+# Copy this file to config.toml and edit it.
+# Keep config.toml private (chmod 600 config.toml). Instead of writing keys here
+# you can set the environment variables ZNTH_API_KEY and TMDB_API_KEY.
+
+# How long to remember lookups between runs (hours). 0 = forever.
+cache_hours = 24
+
+# ---------------------------------------------------------------------------
+# Your media folders. Add one [[directories]] block per folder.
+#   type = "auto"        work it out from each file name (mixed folders)
+#   type = "movie"       everything in here is a movie
+#   type = "tv"          everything in here is TV
+#   type = "anime"       anime series
+#   type = "anime_movie" anime films
+# ---------------------------------------------------------------------------
+[[directories]]
+path = "/media/Storage9"
+type = "auto"
+
+# [[directories]]
+# path = "/media/Storage9/Anime"
+# type = "anime"
+
+[tracker]
+url = "https://znth.cx"
+api_key = ""            # or export ZNTH_API_KEY=...
+request_delay = 2.0     # seconds between API calls, be kind to the site
+fetch_banned_groups = true   # also pull the site's live banned-group list, if its API offers one
+
+# Ids below are znth.cx's, confirmed with `python3 zenith_check.py probe` (2026-10-25).
+# The site has no separate anime categories, so anime is searched under Movies / TV.
+[tracker.categories]
+movie = [1]             # Movies
+tv = [2]                # TV
+anime_movie = []
+anime_tv = []
+
+# Release types the site accepts. Anything else you have (e.g. HDTV) is marked
+# SKIPPED, because the site has nowhere to put it.
+[tracker.types]
+"FULL DISC" = 1
+REMUX = 2
+ENCODE = 3
+"WEB-DL" = 4
+WEBRIP = 5
+
+# Resolutions the site accepts. Others (4320p, 1080i, 576i, 480i...) are marked SKIPPED.
+[tracker.resolutions]
+"2160p" = 2
+"1080p" = 3
+"720p" = 5
+"576p" = 6
+"480p" = 8
+
+[tmdb]
+# Strongly recommended: matching by TMDB id is far more accurate than by name.
+# Upload-Assistant needs one too. Free at https://www.themoviedb.org/settings/api
+api_key = ""            # or export TMDB_API_KEY=...
+
+[scan]
+extensions = ["mkv", "mp4", "avi", "m2ts", "ts", "wmv", "mov"]
+min_size_mb = 100                 # skip anything smaller (samples, junk)
+ignore = ["sample", "extras", "featurettes", "trailers", "behind the scenes"]
+tv_mode = "season"                # "season": a folder of episodes = one season pack; "episode": check each file
+banned_groups = []                # extra groups to skip; znth.cx's own list is built in (see README)
+anime_folder_hints = ["anime"]    # any folder name containing these marks its contents as anime
+min_age_minutes = 60              # skip files changed this recently (still downloading or copying)
+
+
+[upload_assistant]
+path = "~/Upload-Assistant"       # folder that contains upload.py (`setup` puts it here)
+python = "python3"                # setup's venv is picked up automatically
+tracker = "ZNTH"                  # tracker code Upload-Assistant knows znth.cx by (see README)
+extra_args = []                   # added to every call, e.g. ["--debug"] for a rehearsal that posts nothing
+
+# Which verdicts `upload` / `auto` send unless you pass --missing, --new or --all.
+#   ["MISSING"]                 only titles the site doesn't have (safest)
+#   ["NEW_QUALITY"]             only new resolutions/types of titles it has
+#   ["MISSING", "NEW_QUALITY"]  both
+verdicts = ["MISSING"]
+
+# `auto` / unattended only: let Upload-Assistant take ids (TMDB/IMDb/...) from other trackers'
+# APIs but make its own screenshots from your file instead of reusing theirs.
+own_screenshots = true
+# `auto` / unattended only: stop after this many uploads per run (0 = no cap).
+unattended_limit = 0
+
+# ---------------------------------------------------------------------------
+# Presets: your usual runs, by name. Run one with `python3 zenith_check.py nightly`,
+# or run the script with no arguments to get a numbered menu of all of them, in this order.
+# Add, remove, rename or reorder freely. (With no [presets.*] at all, these same defaults are used.)
+#
+#   action   = check | local | upload | auto | setup | update | probe
+#                check   scan + check the site, write a report (never uploads)
+#                local   only list what's on disk, no network
+#                upload  upload from the last report, asking before each one
+#                auto    fresh check, then upload unattended (asks once at a terminal)
+#                setup / update   install / update Upload-Assistant and the ZNTH module
+#   what     = missing | new | all     (upload/auto only; leave out to use upload_assistant.verdicts)
+#   limit    = 10                      (upload/auto only; at most this many per run)
+#   dry_run  = true                    (upload/auto only; show what would go, upload nothing)
+#
+# Flags typed after a preset name override it: `zenith_check.py nightly -l 3` or `nightly -n`.
+# Preset names can't be the same as a command (setup, check, upload, auto, probe).
+# ---------------------------------------------------------------------------
+[presets.report]
+description = "See what's missing on the site (no uploads)"
+action = "check"
+
+[presets.ask]
+description = "Upload what's missing, asking before each one"
+action = "upload"
+what = "missing"
+
+[presets.rehearsal]
+description = "Dry run: what would an unattended upload send?"
+action = "auto"
+what = "all"
+dry_run = true
+
+[presets.missing]
+description = "Upload everything missing, unattended"
+action = "auto"
+what = "missing"
+
+[presets.nightly]
+description = "Missing + new quality, unattended, at most 10"
+action = "auto"
+what = "all"
+limit = 10
+
+[presets.update]
+description = "Update Upload-Assistant and the ZNTH module"
+action = "update"
