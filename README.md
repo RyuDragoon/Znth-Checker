@@ -22,7 +22,7 @@ python3 zenith_check.py                  # menu; pick 1 to see what's missing
 
 Edit `config.toml`:
 
-1. Add your folders under `[[directories]]` (e.g. `/media/Storage9`). Use `type = "auto"`
+1. Add your folders under `[[directories]]` (e.g. `/media/Storage`). Use `type = "auto"`
    for mixed folders, or `movie` / `tv` / `anime` / `anime_movie` if a folder only holds one kind.
 2. Put your keys in, or export them instead so they never touch disk:
    ```sh
